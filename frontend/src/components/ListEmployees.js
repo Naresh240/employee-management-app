@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-function ListEmployees() {
+// Use the same backend environment variable
+const API_URL = "/api";
+
+function ListEmployees({ refreshFlag }) {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/employees/list")
-      .then(response => setEmployees(response.data))
-      .catch(error => console.error(error));
-  }, []);
+    const fetchEmployees = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/employees`);
+        // Ensure the data is always an array
+        setEmployees(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        setEmployees([]);
+      }
+    };
+    fetchEmployees();
+  }, [refreshFlag]);
 
   return (
     <div>
       <h4>List of Employees</h4>
-      <table className="table table-bordered">
+      <table className="table">
         <thead>
           <tr>
             <th>Emp No</th>
@@ -22,8 +33,8 @@ function ListEmployees() {
           </tr>
         </thead>
         <tbody>
-          {employees.map((emp, index) => (
-            <tr key={index}>
+          {employees.map((emp) => (
+            <tr key={emp.empno}>
               <td>{emp.empno}</td>
               <td>{emp.empname}</td>
               <td>{emp.salary}</td>
@@ -36,3 +47,4 @@ function ListEmployees() {
 }
 
 export default ListEmployees;
+
